@@ -7,15 +7,9 @@ pipeline {
     }
 
     stages {
-        stage('Compile code') {
+        stage('Compile, test and package') {
             steps {
-                sh 'mvn compile'
-            }
-        }
-
-        stage('Test code') {
-            steps {
-                sh 'mvn test'
+                sh 'mvn clean install'
             }
             post {
                 success {
@@ -25,15 +19,14 @@ pipeline {
             }
         }
 
-        stage('Package code') {
+        stage('SonarQube Analysis') {
             steps {
-                sh 'mvn package'
-            }
-        }
-
-        stage('display message') {
-            steps {
-                echo 'Test CI_Country webhook'
+                withSonarQubeEnv(
+                    installationName: 'MySonarQubeServer',
+                    credentialsId: 'sonarqubePWD'
+                ) {
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=country-service -Dsonar.projectName=country-service'
+                }
             }
         }
     }
