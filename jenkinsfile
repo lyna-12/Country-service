@@ -24,5 +24,8 @@ pipeline {
                 sh 'mvn -B package -DskipTests'
             }
         }
+        stage('display message') {
+            steps { echo 'Hello from github' }
+        }
     }
 }
