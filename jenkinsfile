@@ -4,28 +4,29 @@ pipeline {
         maven 'mymaven'
     }
     stages {
-        stage('Compile code') {
+        stage('Checkout code') {
             steps {
-                sh 'mvn -B compile'
+                git branch: 'main', url: 'https://github.com/lyna-12/Country-service.git'
             }
         }
+        stage('Compile code') {
+            steps { sh 'mvn compile' }
+        }
         stage('Test code') {
-            steps {
-                sh 'mvn -B test'
-            }
+            steps { sh 'mvn test' }
             post {
-                always {
+                success {
                     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
                 }
             }
         }
         stage('Package code') {
-            steps {
-                sh 'mvn -B package -DskipTests'
-            }
+            steps { sh 'mvn package' }
         }
         stage('display message') {
-            steps { echo 'Hello from github' }
+            steps {
+                echo 'Test CI_Country webhook'
+            }
         }
     }
 }
