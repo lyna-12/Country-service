@@ -1,4 +1,4 @@
-// test webhook - 20/10/2027
+// test webhook - 20/10/2026
 
 pipeline {
     agent any
@@ -10,12 +10,14 @@ pipeline {
     stages {
         stage('Compile, test and package') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn -B clean install'
             }
             post {
-                success {
+                always {
                     junit allowEmptyResults: true,
                           testResults: '**/target/surefire-reports/*.xml'
+                    archiveArtifacts artifacts: 'target/site/jacoco/**',
+                                     allowEmptyArchive: true
                 }
             }
         }
@@ -26,8 +28,14 @@ pipeline {
                     installationName: 'MySonarQubeServer',
                     credentialsId: 'sonarqubePWD'
                 ) {
-                    sh "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=country-service -Dsonar.projectName=country-service"
+                    sh "mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=country-service -Dsonar.projectName=country-service"
                 }
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+                sh 'mvn -B deploy -DskipTests'
             }
         }
     }
